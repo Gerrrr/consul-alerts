@@ -159,7 +159,12 @@ Content-Type: text/html; charset="UTF-8";
 			body.String())
 
 		addr := fmt.Sprintf("%s:%d", emailNotifier.Url, emailNotifier.Port)
-		auth := smtp.PlainAuth("", emailNotifier.Username, emailNotifier.Password, emailNotifier.Url)
+		var auth smtp.Auth
+		if emailNotifier.Username == "" || emailNotifier.Password == "" {
+			auth = nil
+		} else {
+			auth = smtp.PlainAuth("", emailNotifier.Username, emailNotifier.Password, emailNotifier.Url)
+		}
 		if err := sendMail(addr, auth, emailNotifier.SenderEmail, emailNotifier.Receivers, []byte(msg)); err != nil {
 			log.Println("Unable to send notification:", err)
 			continue
