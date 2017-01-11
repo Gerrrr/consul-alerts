@@ -73,7 +73,7 @@ func (emailNotifier *EmailNotifier) Notify(alerts Messages) bool {
 
 			alertStatus, alertPassing, alertWarnings, alertFailures := singleAlertChecks.Summary()
 
-			alertClusterName := emailNotifier.ClusterName + " " + check.Node + " - " + check.CheckId
+			alertClusterName := emailNotifier.ClusterName + " " + check.Node + " - " + check.Check
 
 			e := EmailData{
 				ClusterName:  alertClusterName,

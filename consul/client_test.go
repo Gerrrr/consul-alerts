@@ -110,7 +110,7 @@ func TestGetProfileInfo(t *testing.T) {
 	client.api.KV().Put(&consulapi.KVPair{
 		Key:   "consul-alerts/config/notif-profiles/default",
 		Value: data}, nil)
-	checkProfileInfo := client.GetProfileInfo("node", "serviceID", "checkID")
+	checkProfileInfo := client.GetProfileInfo("node", "serviceName", "checkName")
 	if !reflect.DeepEqual(checkProfileInfo, defaultProfileInfo) {
 		t.Error("Default profile info is loaded incorrectly")
 	}
@@ -132,13 +132,13 @@ func TestGetProfileInfo(t *testing.T) {
 			Interval:       5,
 			NotifiersList:  map[string]bool{"slack": true},
 			NotifProfile:   "checks",
-			NotifSelection: "checks/checkID",
+			NotifSelection: "checks/checkName",
 		},
 		{
 			Interval:       99,
 			NotifiersList:  map[string]bool{"influxdb": true},
 			NotifProfile:   "services",
-			NotifSelection: "services/serviceID",
+			NotifSelection: "services/serviceName",
 		},
 	}
 	for _, s := range testCombinations {
@@ -153,7 +153,7 @@ func TestGetProfileInfo(t *testing.T) {
 		client.api.KV().Put(&consulapi.KVPair{
 			Key:   fmt.Sprintf("consul-alerts/config/notif-selection/%s", s.NotifSelection),
 			Value: []byte(s.NotifProfile)}, nil)
-		checkProfileInfo := client.GetProfileInfo("node", "serviceID", "checkID")
+		checkProfileInfo := client.GetProfileInfo("node", "serviceName", "checkName")
 		if !reflect.DeepEqual(checkProfileInfo, profileInfo) {
 			t.Error("Profile info is loaded incorrectly")
 		}
@@ -167,9 +167,9 @@ func TestIsBlacklisted(t *testing.T) {
 	}
 	clearKVPath(t, client, "consul-alerts/config/checks/blacklist/")
 	node := "test-node"
-	checkID := "test-check"
-	serviceID := "test-service"
-	check := Check{Node: node, CheckID: checkID, ServiceID: serviceID}
+	checkName := "test-check"
+	serviceName := "test-service"
+	check := Check{Node: node, Name: checkName, ServiceName: serviceName}
 	isBlackListed := client.IsBlacklisted(&check)
 	if isBlackListed {
 		t.Error("isBlackListed should be false if there is no corresponding entry in the blacklist")
@@ -179,12 +179,12 @@ func TestIsBlacklisted(t *testing.T) {
 		{"type": "node",
 			"key": fmt.Sprintf("consul-alerts/config/checks/blacklist/nodes/%s", node)},
 		{"type": "service",
-			"key": fmt.Sprintf("consul-alerts/config/checks/blacklist/services/%s", serviceID)},
+			"key": fmt.Sprintf("consul-alerts/config/checks/blacklist/services/%s", serviceName)},
 		{"type": "check",
-			"key": fmt.Sprintf("consul-alerts/config/checks/blacklist/checks/%s", checkID)},
+			"key": fmt.Sprintf("consul-alerts/config/checks/blacklist/checks/%s", checkName)},
 		{"type": "node-service-check combination",
 			"key": fmt.Sprintf("consul-alerts/config/checks/blacklist/single/%s/%s/%s",
-				node, serviceID, checkID)},
+				node, serviceName, checkName)},
 	}
 
 	// test that blacklisting the exact key works

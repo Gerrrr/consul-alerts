@@ -61,8 +61,8 @@ func (opsgenie *OpsGenieNotifier) Notify(messages Messages) bool {
 
 func (opsgenie OpsGenieNotifier) createAlias(message Message) string {
 	incidentKey := message.Node
-	if message.ServiceId != "" {
-		incidentKey += ":" + message.ServiceId
+	if message.Service != "" {
+		incidentKey += ":" + message.Service
 	}
 
 	return incidentKey

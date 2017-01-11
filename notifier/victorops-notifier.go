@@ -59,7 +59,7 @@ func (vo *VictorOpsNotifier) Notify(messages Messages) bool {
 		entityDisplayName := entityID
 
 		// This might be a node level check without an explicit service
-		if message.ServiceId == "" {
+		if message.Service == "" {
 			entityID += message.CheckId
 			entityDisplayName += message.Check
 		} else {

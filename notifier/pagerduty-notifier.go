@@ -27,10 +27,10 @@ func (pd *PagerDutyNotifier) Notify(messages Messages) bool {
 
 	for _, message := range messages {
 		incidentKey := message.Node
-		if message.ServiceId != "" {
-			incidentKey += ":" + message.ServiceId
+		if message.Service != "" {
+			incidentKey += ":" + message.Service
 		}
-		incidentKey += ":" + message.CheckId
+		incidentKey += ":" + message.Check
 		var response *gopherduty.PagerDutyResponse
 		switch {
 		case message.IsPassing():

@@ -268,7 +268,7 @@ func (c *ConsulAlertClient) UpdateCheckData() {
 		settodelete := true
 
 		for j := range nodecat {
-			if nodecat[j].CheckID == check {
+			if nodecat[j].Name == check {
 				settodelete = false
 				break
 			}
@@ -282,8 +282,8 @@ func (c *ConsulAlertClient) UpdateCheckData() {
 	for _, health := range healths {
 
 		node := health.Node
-		service := health.ServiceID
-		check := health.CheckID
+		service := health.ServiceName
+		check := health.Name
 		if service == "" {
 			service = "_"
 		}
@@ -352,14 +352,14 @@ func (c *ConsulAlertClient) GetReminders() []notifier.Message {
 // SetReminder sets a reminder
 func (c *ConsulAlertClient) SetReminder(m notifier.Message) {
 	data, _ := json.Marshal(m)
-	key := fmt.Sprintf("consul-alerts/reminders/%s/%s", m.Node, m.CheckId)
+	key := fmt.Sprintf("consul-alerts/reminders/%s/%s", m.Node, m.Check)
 	c.api.KV().Put(&consulapi.KVPair{Key: key, Value: data}, nil)
 	log.Println("Setting reminder for node: ", m.Node)
 }
 
 // DeleteReminder deletes a reminder
-func (c *ConsulAlertClient) DeleteReminder(node string, checkid string) {
-	key := fmt.Sprintf("consul-alerts/reminders/%s/%s", node, checkid)
+func (c *ConsulAlertClient) DeleteReminder(node string, checkName string) {
+	key := fmt.Sprintf("consul-alerts/reminders/%s/%s", node, checkName)
 	c.api.KV().Delete(key, nil)
 	log.Println("Deleting reminder for node: ", node)
 }
@@ -594,11 +594,11 @@ func (c *ConsulAlertClient) updateHealthCheck(key string, health *Check) {
 	c.api.KV().Put(&consulapi.KVPair{Key: key, Value: data}, nil)
 }
 
-func (c *ConsulAlertClient) CheckStatus(node, serviceId, checkId string) (status, output string) {
-	if serviceId == "" {
-		serviceId = "_"
+func (c *ConsulAlertClient) CheckStatus(node, serviceName, checkName string) (status, output string) {
+	if serviceName == "" {
+		serviceName = "_"
 	}
-	key := fmt.Sprintf("consul-alerts/checks/%s/%s/%s", node, serviceId, checkId)
+	key := fmt.Sprintf("consul-alerts/checks/%s/%s/%s", node, serviceName, checkName)
 	kvPair, _, _ := c.api.KV().Get(key, nil)
 
 	if kvPair == nil {
@@ -643,12 +643,12 @@ func (c *ConsulAlertClient) getProfileForEntity(entity string, id string) string
 	return ""
 }
 
-func (c *ConsulAlertClient) getProfileForService(serviceID string) string {
-	return c.getProfileForEntity("service", serviceID)
+func (c *ConsulAlertClient) getProfileForService(service string) string {
+	return c.getProfileForEntity("service", service)
 }
 
-func (c *ConsulAlertClient) getProfileForCheck(checkID string) string {
-	return c.getProfileForEntity("check", checkID)
+func (c *ConsulAlertClient) getProfileForCheck(check string) string {
+	return c.getProfileForEntity("check", check)
 }
 
 func (c *ConsulAlertClient) getProfileForNode(node string) string {
@@ -656,14 +656,14 @@ func (c *ConsulAlertClient) getProfileForNode(node string) string {
 }
 
 // GetProfileInfo returns profile info for check
-func (c *ConsulAlertClient) GetProfileInfo(node, serviceID, checkID string) ProfileInfo {
-	log.Println("Getting profile for node: ", node, " service: ", serviceID, " check: ", checkID)
+func (c *ConsulAlertClient) GetProfileInfo(node, serviceName, checkName string) ProfileInfo {
+	log.Println("Getting profile for node: ", node, " service: ", serviceName, " check: ", checkName)
 
 	var profile string
 
-	profile = c.getProfileForService(serviceID)
+	profile = c.getProfileForService(serviceName)
 	if profile == "" {
-		profile = c.getProfileForCheck(checkID)
+		profile = c.getProfileForCheck(checkName)
 	}
 	if profile == "" {
 		profile = c.getProfileForNode(node)
@@ -698,17 +698,17 @@ func (c *ConsulAlertClient) IsBlacklisted(check *Check) bool {
 
 	service := "_"
 	serviceBlacklisted := false
-	if check.ServiceID != "" {
-		service = check.ServiceID
+	if check.ServiceName != "" {
+		service = check.ServiceName
 		serviceCheckKey := fmt.Sprintf("consul-alerts/config/checks/blacklist/services/%s", service)
 		serviceBlacklisted = c.CheckKeyExists(serviceCheckKey) || c.CheckKeyMatchesRegexp("consul-alerts/config/checks/blacklist/services", service)
 	}
 
-	checkId := check.CheckID
-	checkCheckKey := fmt.Sprintf("consul-alerts/config/checks/blacklist/checks/%s", checkId)
-	checkBlacklisted := c.CheckKeyExists(checkCheckKey) || c.CheckKeyMatchesRegexp("consul-alerts/config/checks/blacklist/checks", checkId)
+	checkName := check.Name
+	checkCheckKey := fmt.Sprintf("consul-alerts/config/checks/blacklist/checks/%s", checkName)
+	checkBlacklisted := c.CheckKeyExists(checkCheckKey) || c.CheckKeyMatchesRegexp("consul-alerts/config/checks/blacklist/checks", checkName)
 
-	singleKey := fmt.Sprintf("consul-alerts/config/checks/blacklist/single/%s/%s/%s", node, service, checkId)
+	singleKey := fmt.Sprintf("consul-alerts/config/checks/blacklist/single/%s/%s/%s", node, service, checkName)
 	singleBlacklisted := c.CheckKeyExists(singleKey)
 
 	return nodeBlacklisted || serviceBlacklisted || checkBlacklisted || singleBlacklisted

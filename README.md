@@ -294,7 +294,7 @@ Reminders resend the notifications at programmable intervals until they are reso
 
 #### Enable/Disable Specific Health Checks
 
-There are multiple ways to enable/disable health check notifications: mark them by node, serviceID, checkID, regular expression, or mark individually by node/serviceID/checkID. This is done by adding a KV entry in `consul-alerts/config/checks/blacklist/...`. Removing the entry will re-enable the check notifications.
+There are multiple ways to enable/disable health check notifications: mark them by node, serviceName, checkName, regular expression, or mark individually by node/serviceName/checkName. This is done by adding a KV entry in `consul-alerts/config/checks/blacklist/...`. Removing the entry will re-enable the check notifications.
 
 ##### Disable all notification by node
 
@@ -306,7 +306,7 @@ Add a KV entry with the key `consul-alerts/config/checks/blacklist/nodes` and th
 
 ##### Disable all notification by service
 
-Add a KV entry with the key `consul-alerts/config/checks/blacklist/services/{{ serviceId }}`. This will disable notifications for the specified `serviceId`.
+Add a KV entry with the key `consul-alerts/config/checks/blacklist/services/{{ serviceName }}`. This will disable notifications for the specified `serviceName`.
 
 ##### Disable all notifications for the services matching regular expressions
 
@@ -314,7 +314,7 @@ Add a KV entry with the key `consul-alerts/config/checks/blacklist/services` and
 
 ##### Disable all notification by healthCheck
 
-Add a KV entry with the key `consul-alerts/config/checks/blacklist/checks/{{ checkId }}`. This will disable notifications for the specified `checkId`.
+Add a KV entry with the key `consul-alerts/config/checks/blacklist/checks/{{ checkName }}`. This will disable notifications for the specified `checkName`.
 
 ##### Disable all notifications for the healthChecks matching regular expressions
 
@@ -322,7 +322,7 @@ Add a KV entry with the key `consul-alerts/config/checks/blacklist/checks` and t
 
 ##### Disable a single health check
 
-Add a KV entry with the key `consul-alerts/config/checks/blacklist/single/{{ node }}/{{ serviceId }}/{{ checkId }}`. This will disable the specific health check. If the health check is not associated with a service, use the `_` as the serviceId.
+Add a KV entry with the key `consul-alerts/config/checks/blacklist/single/{{ node }}/{{ serviceName }}/{{ checkName }}`. This will disable the specific health check. If the health check is not associated with a service, use the `_` as the serviceName.
 
 ### Events
 
@@ -490,7 +490,7 @@ Health Check via API
 
 Health status can also be queried via the API. This can be used for compatibility with nagios, sensu, or other monitoring tools. To get the status of a specific check, use the following entrypoint.
 
-`http://consul-alerts:9000/v1/health?node=<node>&service=<serviceId>&check=<checkId>`
+`http://consul-alerts:9000/v1/health?node=<node>&service=<serviceName>&check=<checkName>`
 
 This will return the output of the check and the following HTTP codes:
 
@@ -501,7 +501,7 @@ This will return the output of the check and the following HTTP codes:
 | critical | 503  |
 | unknown  | 404  |
 
-`http://consul-alerts:9000/v1/health/wildcard?node=<node>&service=<serviceId>&check=<checkId>&status=<status>&alwaysOk=true&ignoreBlacklist=true`
+`http://consul-alerts:9000/v1/health/wildcard?node=<node>&service=<serviceName>&check=<checkName>&status=<status>&alwaysOk=true&ignoreBlacklist=true`
 `v1/health/wildcard` is similar to `v1/health` but returns all matched checks (omitted service/node/check params assumed as any) . Values returned in JSON form, status code 503 if one of services in critical state.
 
 Additional params are ignoreBlacklist and alwaysOk which forces status code to 200 regardless of checks status.

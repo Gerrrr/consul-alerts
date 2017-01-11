@@ -82,20 +82,20 @@ type Consul interface {
 	CheckChangeThreshold() int
 	UpdateCheckData()
 	NewAlerts() []Check
-	NewAlertsWithFilter(node string, service string, checkId string, statuses []string, ignoreBlacklist bool) []Check
+	NewAlertsWithFilter(node string, service string, checkName string, statuses []string, ignoreBlacklist bool) []Check
 
 	IsBlacklisted(check *Check) bool
 
 	CustomNotifiers() map[string]string
 
-	CheckStatus(node, statusId, checkId string) (status, output string)
+	CheckStatus(node, serviceName, checkName string) (status, output string)
 	CheckKeyExists(key string) bool
 
-	GetProfileInfo(node, serviceID, checkID string) ProfileInfo
+	GetProfileInfo(node, serviceName, checkName string) ProfileInfo
 
 	GetReminders() []notifier.Message
 	SetReminder(m notifier.Message)
-	DeleteReminder(node string, checkid string)
+	DeleteReminder(node string, checkName string)
 }
 
 // DefaultAlertConfig loads default config settings
